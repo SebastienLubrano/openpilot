@@ -229,6 +229,7 @@ class CarInterface(CarInterfaceBase):
 
     elif candidate in (CAR.ACCORD_NIDEC, CAR.ACCORD_NIDEC_HYBRID):
       stop_and_go = False
+      ret.safetyParam = 1
       ret.mass = 3536. * CV.LB_TO_KG + STD_CARGO_KG
       ret.wheelbase = 2.75
       ret.centerToFront = ret.wheelbase * 0.39
