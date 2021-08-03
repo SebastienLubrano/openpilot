@@ -7,7 +7,7 @@ from common.basedir import BASEDIR
 from selfdrive.swaglog import cloudlog
 
 
-TESTED_BRANCHES = ['devel', 'release2-staging', 'release3-staging', 'dashcam-staging', 'release2', 'release3', 'dashcam']
+TESTED_BRANCHES = ['devel', 'release2-staging', 'release3-staging', 'dashcam-staging', 'release2', 'release3', 'dashcam', '0.8.7-shane-spektor']
 SA_BRANCHES = ['stock_additions', 'SA-master']
 SA_BRANCHES += [f'{prefix}_{brnch}' for brnch in SA_BRANCHES for prefix in ['shanesmiskol', 'sshane']]
 
@@ -57,6 +57,7 @@ terms_version: bytes = b"2"
 dirty: bool = True
 comma_remote: bool = False
 smiskol_remote: bool = False
+seb_remote: bool = False
 tested_branch: bool = False
 dirty_files = None
 origin = get_git_remote()
@@ -67,6 +68,7 @@ if (origin is not None) and (branch is not None):
   try:
     comma_remote = origin.startswith('git@github.com:commaai') or origin.startswith('https://github.com/commaai')
     smiskol_remote = origin.startswith('git@github.com:sshane') or origin.startswith('https://github.com/sshane')
+    seb_remote = origin.startswith('git@github.com:sebastienlubrano') or origin.startswith('https://github.com/sebastienlubrano')
 
     tested_branch = get_git_branch() in (TESTED_BRANCHES + SA_BRANCHES)
 
@@ -82,7 +84,7 @@ if (origin is not None) and (branch is not None):
       dirty = (subprocess.call(["git", "diff-index", "--quiet", branch, "--"]) != 0)
 
       # Log dirty files
-      if dirty and (comma_remote or smiskol_remote):
+      if dirty and (comma_remote or smiskol_remote or seb_remote):
         try:
           dirty_files = run_cmd(["git", "diff-index", branch, "--"])
           cloudlog.event("dirty SA branch", version=version, dirty=dirty, origin=origin, branch=branch,
@@ -90,7 +92,7 @@ if (origin is not None) and (branch is not None):
         except subprocess.CalledProcessError:
           pass
 
-    dirty = dirty or (not comma_remote and not smiskol_remote)
+    dirty = dirty or (not comma_remote and not smiskol_remote and not seb_remote)
     dirty = dirty or ('master' in branch)
 
   except subprocess.CalledProcessError:
