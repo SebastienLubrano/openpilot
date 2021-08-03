@@ -401,20 +401,19 @@ class CarState(CarStateBase):
     ret.steerError = False
     ret.steerWarning = False
 
-    if self.lkasEnabled:
-      if self.CP.carFingerprint in SERIAL_STEERING:
-        steer_status = self.steer_status_values[cp_cam.vl["STEER_STATUS"]['STEER_STATUS']]
-      else:
-        steer_status = self.steer_status_values[cp.vl["STEER_STATUS"]["STEER_STATUS"]]
-      ret.steerError = steer_status not in ["NORMAL", "NO_TORQUE_ALERT_1", "NO_TORQUE_ALERT_2", "LOW_SPEED_LOCKOUT", "TMP_FAULT"]
-      # NO_TORQUE_ALERT_2 can be caused by bump OR steering nudge from driver
-      self.steer_not_allowed = steer_status not in ["NORMAL", "NO_TORQUE_ALERT_2"]
-      # LOW_SPEED_LOCKOUT is not worth a warning
-      if (self.automaticLaneChange and not self.belowLaneChangeSpeed and (self.rightBlinkerOn or self.leftBlinkerOn)) or not (self.rightBlinkerOn or self.leftBlinkerOn):
-        ret.steerWarning = steer_status not in ["NORMAL", "LOW_SPEED_LOCKOUT", "NO_TORQUE_ALERT_2"]
-      # User steering input above a certain threshold should cancel computer steering temporarily
-      if self.CP.carFingerprint in (CAR.ACCORD_NIDEC, CAR.ACCORD_NIDEC_HYBRID):
-        self.steer_not_allowed = True if bool(abs(ret.steeringTorque) > 45) else self.steer_not_allowed
+    if self.CP.carFingerprint in SERIAL_STEERING:
+      steer_status = self.steer_status_values[cp_cam.vl["STEER_STATUS"]['STEER_STATUS']]
+    else:
+      steer_status = self.steer_status_values[cp.vl["STEER_STATUS"]["STEER_STATUS"]]
+    ret.steerError = steer_status not in ["NORMAL", "NO_TORQUE_ALERT_1", "NO_TORQUE_ALERT_2", "LOW_SPEED_LOCKOUT", "TMP_FAULT"]
+    # NO_TORQUE_ALERT_2 can be caused by bump OR steering nudge from driver
+    self.steer_not_allowed = steer_status not in ["NORMAL", "NO_TORQUE_ALERT_2"]
+    # LOW_SPEED_LOCKOUT is not worth a warning
+    if (self.automaticLaneChange and not self.belowLaneChangeSpeed and (self.rightBlinkerOn or self.leftBlinkerOn)) or not (self.rightBlinkerOn or self.leftBlinkerOn):
+      ret.steerWarning = steer_status not in ["NORMAL", "LOW_SPEED_LOCKOUT", "NO_TORQUE_ALERT_2"]
+    # User steering input above a certain threshold should cancel computer steering temporarily
+    if self.CP.carFingerprint in (CAR.ACCORD_NIDEC, CAR.ACCORD_NIDEC_HYBRID):
+      self.steer_not_allowed = True if bool(abs(ret.steeringTorque) > 45) else self.steer_not_allowed
 
     # TODO: discover the CAN msg that has the imperial unit bit for all other cars
     self.is_metric = not cp.vl["HUD_SETTING"]["IMPERIAL_UNIT"] if self.CP.carFingerprint in (CAR.CIVIC) else False
