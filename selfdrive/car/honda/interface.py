@@ -236,7 +236,7 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 13.6 # 13.37 as spec
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 238], [0, 238]]
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.24], [0.08]]      
-      ret.lateralTuning.pid.kf = 0.000025
+      ret.lateralTuning.pid.kf = 0.00003
       tire_stiffness_factor = 0.8467
       ret.longitudinalTuning.kpBP = [0., 5., 35.]
       ret.longitudinalTuning.kpV = [1.2, 0.8, 0.5] 
@@ -467,9 +467,10 @@ class CarInterface(CarInterfaceBase):
       ret.brakeMaxBP = [5., 20.]  # m/s
       ret.brakeMaxV = [1., 0.8]   # max brake allowed
 
+    ret.stoppingControl = True
     ret.startAccel = 0.5
 
-    ret.steerActuatorDelay = 0.1
+    ret.steerActuatorDelay = 0.2
     ret.steerRateCost = 0.5
     ret.steerLimitTimer = 0.8
 
