@@ -8,8 +8,8 @@ from selfdrive.swaglog import cloudlog
 
 
 TESTED_BRANCHES = ['devel', 'release2-staging', 'release3-staging', 'dashcam-staging', 'release2', 'release3', 'dashcam', '0.8.7-shane-spektor']
-SA_BRANCHES = ['stock_additions', 'SA-master']
-SA_BRANCHES += [f'{prefix}_{brnch}' for brnch in SA_BRANCHES for prefix in ['shanesmiskol', 'sshane']]
+SA_BRANCHES = ['stock_additions', 'SA-master', '0.8.7-shane-spektor']
+SA_BRANCHES += [f'{prefix}_{brnch}' for brnch in SA_BRANCHES for prefix in ['shanesmiskol', 'sshane', 'SebastienLubrano']]
 
 def run_cmd(cmd: List[str]) -> str:
     return subprocess.check_output(cmd, encoding='utf8').strip()
@@ -68,7 +68,7 @@ if (origin is not None) and (branch is not None):
   try:
     comma_remote = origin.startswith('git@github.com:commaai') or origin.startswith('https://github.com/commaai')
     smiskol_remote = origin.startswith('git@github.com:sshane') or origin.startswith('https://github.com/sshane')
-    seb_remote = origin.startswith('git@github.com:sebastienlubrano') or origin.startswith('https://github.com/sebastienlubrano')
+    seb_remote = origin.startswith('git@github.com:SebastienLubrano') or origin.startswith('https://github.com/SebastienLubrano')
 
     tested_branch = get_git_branch() in (TESTED_BRANCHES + SA_BRANCHES)
 

@@ -1,7 +1,7 @@
 """Install exception handler for process crash."""
 from selfdrive.swaglog import cloudlog
 from selfdrive.version import version
-from selfdrive.version import origin, branch, dirty, smiskol_remote, get_git_commit
+from selfdrive.version import origin, branch, dirty, get_git_commit
 from common.op_params import opParams
 
 import sentry_sdk
