@@ -20,8 +20,8 @@ class CarControllerParams():
       
       #Need 
       self.STEER_DELTA_UP = 2
-      self.STEER_DELTA_DOWN = 4
-      self.STEER_DRIVER_ALLOWANCE = 52
+      self.STEER_DELTA_DOWN = 2
+      self.STEER_DRIVER_ALLOWANCE = 50
       self.STEER_DRIVER_MULTIPLIER = 1
       self.STEER_DRIVER_FACTOR = 3
 
