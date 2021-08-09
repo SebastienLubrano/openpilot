@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 import os
 import json
+from atomicwrites import atomic_write
 from common.colors import COLORS
 from common.travis_checker import BASEDIR
-from atomicwrites import atomic_write
+from selfdrive.hardware import TICI
 try:
   from common.realtime import sec_since_boot
 except ImportError:
@@ -97,7 +98,8 @@ class opParams:
       self.fork_params = {'camera_offset': Param(0.06, allowed_types=NUMBER), live=True}  # NUMBER allows both floats and ints
     """
 
-    self.fork_params = {'camera_offset': Param(0.06, NUMBER, 'Your camera offset to use in lane_planner.py', live=True),
+    self.fork_params = {'camera_offset': Param(-0.04 if TICI else 0.06, NUMBER, 'Your camera offset to use in lane_planner.py\n'
+                                                                                'If you have a comma three, note that the default camera offset is -0.04!', live=True),
                         'dynamic_follow': Param('stock', str, static=True, hidden=True),
                         'global_df_mod': Param(1.0, NUMBER, 'The multiplier for the current distance used by dynamic follow. The range is limited from 0.85 to 2.5\n'
                                                             'Smaller values will get you closer, larger will get you farther\n'
@@ -118,7 +120,6 @@ class opParams:
                                                               'auto will reboot the device when an update is seen', static=True),
                         'dynamic_gas': Param(False, bool, 'Whether to use dynamic gas if your car is supported'),
                         'hide_auto_df_alerts': Param(False, bool, 'Hides the alert that shows what profile the model has chosen'),
-                        'model_laneless': Param(False, bool, 'Ignore lane lines, only path is used for planning (e2e). Experimental', static=True),
                         'log_auto_df': Param(False, bool, 'Logs dynamic follow data for auto-df', static=True),
                         # 'dynamic_camera_offset': Param(False, bool, 'Whether to automatically keep away from oncoming traffic.\n'
                         #                                             'Works from 35 to ~60 mph (requires radar)'),
