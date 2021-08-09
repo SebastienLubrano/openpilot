@@ -1,1 +1,1 @@
-#define COMMA_VERSION "0.8.7 ( ͡❛ ͜ʖ ͡❛)"
+#define COMMA_VERSION "0.8.7 ツ"
