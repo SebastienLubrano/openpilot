@@ -19,11 +19,11 @@ class CarControllerParams():
       self.STEER_LOOKUP_V = [v * -1 for v in CP.lateralParams.torqueV][1:][::-1] + list(CP.lateralParams.torqueV)
       
       #Need 
-      self.STEER_DELTA_UP = 2
-      self.STEER_DELTA_DOWN = 2
-      self.STEER_DRIVER_ALLOWANCE = 50
+      self.STEER_DELTA_UP = 7
+      self.STEER_DELTA_DOWN = 14
+      self.STEER_DRIVER_ALLOWANCE = 20
       self.STEER_DRIVER_MULTIPLIER = 1
-      self.STEER_DRIVER_FACTOR = 3
+      self.STEER_DRIVER_FACTOR = 4
 
       self.BOSCH_ACCEL_LOOKUP_BP = [-1., 0., 0.6]
       self.BOSCH_ACCEL_LOOKUP_V = [-3.5, 0., 2.]

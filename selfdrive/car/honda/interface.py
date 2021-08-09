@@ -227,7 +227,23 @@ class CarInterface(CarInterfaceBase):
       else:
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.18]]
 
-    elif candidate in (CAR.ACCORD_NIDEC, CAR.ACCORD_NIDEC_HYBRID):
+    elif candidate == CAR.ACCORD_NIDEC:
+      stop_and_go = False
+      ret.safetyParam = 1
+      ret.mass = 3279. * CV.LB_TO_KG + STD_CARGO_KG
+      ret.wheelbase = 2.75
+      ret.centerToFront = ret.wheelbase * 0.39
+      ret.steerRatio = 13.6 # 13.37 as spec
+      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 238], [0, 238]]
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.24], [0.07]]      
+      ret.lateralTuning.pid.kf = 0.000025
+      tire_stiffness_factor = 0.8467
+      ret.longitudinalTuning.kpBP = [0., 5., 35.]
+      ret.longitudinalTuning.kpV = [1.2, 0.8, 0.5] 
+      ret.longitudinalTuning.kiBP = [0., 35.]
+      ret.longitudinalTuning.kiV = [0.18, 0.12]  
+    
+    elif candidate == CAR.ACCORD_NIDEC_HYBRID:
       stop_and_go = False
       ret.safetyParam = 1
       ret.mass = 3536. * CV.LB_TO_KG + STD_CARGO_KG
@@ -235,8 +251,8 @@ class CarInterface(CarInterfaceBase):
       ret.centerToFront = ret.wheelbase * 0.39
       ret.steerRatio = 13.6 # 13.37 as spec
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 238], [0, 238]]
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.24], [0.08]]      
-      ret.lateralTuning.pid.kf = 0.000025
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.3], [0.1]]      
+      ret.lateralTuning.pid.kf = 0.00002
       tire_stiffness_factor = 0.8467
       ret.longitudinalTuning.kpBP = [0., 5., 35.]
       ret.longitudinalTuning.kpV = [1.2, 0.8, 0.5] 
