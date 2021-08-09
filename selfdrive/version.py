@@ -7,15 +7,9 @@ from common.basedir import BASEDIR
 from selfdrive.swaglog import cloudlog
 
 
-<<<<<<< HEAD
 TESTED_BRANCHES = ['devel', 'release2-staging', 'release3-staging', 'dashcam-staging', 'release2', 'release3', 'dashcam', '0.8.7-shane-spektor']
 SA_BRANCHES = ['stock_additions', 'SA-master', '0.8.7-shane-spektor']
 SA_BRANCHES += [f'{prefix}_{brnch}' for brnch in SA_BRANCHES for prefix in ['shanesmiskol', 'sshane', 'SebastienLubrano']]
-=======
-TESTED_BRANCHES = ['devel', 'release2-staging', 'release3-staging', 'dashcam-staging', 'release2', 'release3', 'dashcam']
-SA_BRANCHES = ['stock_additions', 'SA-master']  # tested SA branches
-SA_BRANCHES += [f'{prefix}_{brnch}' for brnch in SA_BRANCHES for prefix in ['shanesmiskol', 'sshane']]  # usernames
->>>>>>> 71d9947c2c27c2616ca96858d4a08fd1c0c51fa7
 
 def run_cmd(cmd: List[str]) -> str:
     return subprocess.check_output(cmd, encoding='utf8').strip()
