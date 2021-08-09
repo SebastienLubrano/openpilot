@@ -1,7 +1,7 @@
 [submodule "panda"]
 	path = panda
 	url = ../../SebastienLubrano/panda.git
-        branch = master
+        branch = spektor
 [submodule "opendbc"]
 	path = opendbc
 	url = ../../SebastienLubrano/opendbc.git
@@ -10,8 +10,8 @@
 	url = ../../commaai/laika.git
 [submodule "cereal"]
 	path = cereal
-	url = ../../Aragon7777/cereal.git
-        branch = master
+	url = ../../SebastienLubrano/cereal.git
+        branch = spektor
 [submodule "rednose_repo"]
 	path = rednose_repo
 	url = ../../commaai/rednose.git
