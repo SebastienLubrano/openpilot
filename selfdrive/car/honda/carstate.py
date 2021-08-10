@@ -411,6 +411,9 @@ class CarState(CarStateBase):
     # LOW_SPEED_LOCKOUT is not worth a warning
     if (self.automaticLaneChange and not self.belowLaneChangeSpeed and (self.rightBlinkerOn or self.leftBlinkerOn)) or not (self.rightBlinkerOn or self.leftBlinkerOn):
       ret.steerWarning = steer_status not in ["NORMAL", "LOW_SPEED_LOCKOUT", "NO_TORQUE_ALERT_2"]
+    # User steering input above a certain threshold should cancel computer steering temporarily
+    if self.CP.carFingerprint in (CAR.ACCORD_NIDEC, CAR.ACCORD_NIDEC_HYBRID):
+      self.steer_not_allowed = True if bool(abs(ret.steeringTorque) >= 50) else self.steer_not_allowed
     
 
     # TODO: discover the CAN msg that has the imperial unit bit for all other cars
