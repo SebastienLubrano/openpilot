@@ -338,6 +338,11 @@ FW_VERSIONS = {
     ],
   }, 
   CAR.ACCORD_NIDEC_HYBRID: {
+    (Ecu.vsa, 0x18DA28F1, None): [
+      b'57114-T3Z-A040\x00\x00',
+      b'57114-T3Z-A050\x00\x00',
+      b'57114-T3Z-A060\x00\x00',
+    ],
     (Ecu.gateway, 0x18DAEFF1, None): [
       b'38897-T3W-0130\x00\x00',
     ],
