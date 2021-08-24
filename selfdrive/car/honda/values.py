@@ -16,6 +16,12 @@ class CarControllerParams():
     self.STEER_LOOKUP_BP = [v * -1 for v in CP.lateralParams.torqueBP][1:][::-1] + list(CP.lateralParams.torqueBP)
     self.STEER_LOOKUP_V = [v * -1 for v in CP.lateralParams.torqueV][1:][::-1] + list(CP.lateralParams.torqueV)
 
+    self.STEER_DELTA_UP = 7
+    self.STEER_DELTA_DOWN = 14
+    self.STEER_DRIVER_ALLOWANCE = 20
+    self.STEER_DRIVER_MULTIPLIER = 1
+    self.STEER_DRIVER_FACTOR = 4
+
     self.NIDEC_ACCEL_LOOKUP_BP = [-1., 0., .6]
     self.NIDEC_ACCEL_LOOKUP_V = [-4.8, 0., 2.0]
 
@@ -57,6 +63,8 @@ class CAR:
   ACCORDH = "HONDA ACCORD HYBRID 2018"
   ACCORD_2021 = "HONDA ACCORD 2021"
   ACCORDH_2021 = "HONDA ACCORD HYBRID 2021"
+  ACCORD_NIDEC = "HONDA ACCORD 2016-17 SERIAL STEERING"
+  ACCORD_NIDEC_HYBRID = "HONDA ACCORD HYBRID 2016-17 SERIAL STEERING"
   CIVIC = "HONDA CIVIC 2016"
   CIVIC_BOSCH = "HONDA CIVIC (BOSCH) 2019"
   CIVIC_BOSCH_DIESEL = "HONDA CIVIC SEDAN 1.6 DIESEL 2019"
@@ -82,6 +90,16 @@ DIAG_MSGS = {1600: 5, 1601: 8}
 FINGERPRINTS = {
   CAR.ACCORDH: [{
     148: 8, 228: 5, 304: 8, 330: 8, 344: 8, 380: 8, 387: 8, 388: 8, 399: 7, 419: 8, 420: 8, 427: 3, 432: 7, 441: 5, 450: 8, 464: 8, 477: 8, 479: 8, 495: 8, 525: 8, 545: 6, 662: 4, 773: 7, 777: 8, 780: 8, 804: 8, 806: 8, 808: 8, 829: 5, 862: 8, 884: 8, 891: 8, 927: 8, 929: 8, 1302: 8, 1600: 5, 1601: 8, 1652: 8
+  }],
+  CAR.ACCORD_NIDEC: [{
+    57: 3, 145: 8, 316: 8, 342: 6, 344: 8, 380: 8, 398: 3, 400: 4, 401: 8, 420: 8, 422: 8, 426: 8, 427: 3, 432: 7, 464: 8, 476: 4, 487: 4, 490: 8, 506: 8, 507: 1, 520: 8, 521: 8, 542: 7, 545: 4, 597: 8, 660: 8, 661: 4, 773: 7, 777: 8, 780: 8, 800: 8, 804: 8, 808: 8, 829: 5, 871: 8, 882: 2, 884: 8, 891: 8, 892: 8, 918: 7, 923: 2, 927: 8, 929: 8, 983: 8, 985: 3, 1024: 5, 1027: 5, 1029: 8, 1036: 8, 1039: 8, 1057: 5, 1064: 7, 1088: 8, 1089: 8, 1108: 8, 1125: 8, 1296: 3, 1365: 5, 1424: 5, 1600: 5, 1601: 8, 2015: 8 },
+  {
+    57: 3, 145: 8, 316: 8, 342: 6, 344: 8, 380: 8, 398: 3, 401: 8, 420: 8, 422: 8, 426: 8, 432: 7, 464: 8, 476: 4, 487: 4, 490: 8, 506: 8, 507: 1, 520: 8, 521: 8, 542: 7, 545: 4, 597: 8, 660: 8, 661: 4, 773: 7, 777: 8, 780: 8, 800: 8, 804: 8, 808: 8, 829: 5, 871: 8, 882: 2, 884: 8, 891: 8, 892: 8, 918: 7, 923: 2, 927: 8, 929: 8, 983: 8, 985: 3, 1024: 5, 1027: 5, 1029: 8, 1036: 8, 1039: 8, 1057: 5, 1064: 7, 1088: 8, 1089: 8, 1108: 8, 1125: 8, 1296: 3, 1365: 5, 1424: 5, 1600: 5, 1601: 8, 2015: 8 },
+  { 
+    57: 3, 145: 8, 316: 8, 342: 6, 344: 8, 380: 8, 398: 3, 401: 8, 420: 8, 422: 8, 426: 8, 432: 7, 464: 8, 476: 4, 487: 4, 490: 8, 506: 8, 507: 1, 513: 6, 521: 8, 542: 7, 545: 4, 597: 8, 660: 8, 661: 4, 773: 7, 777: 8, 780: 8, 800: 8, 804: 8, 808: 8, 829: 5, 871: 8, 882: 2, 884: 8, 891: 8, 892: 8, 918: 7, 923: 2, 927: 8, 929: 8, 983: 8, 985: 3, 1024: 5, 1027: 5, 1029: 8, 1036: 8, 1039: 8, 1057: 5, 1064: 7, 1088: 8, 1089: 8, 1108: 8, 1125: 8, 1296: 3, 1365: 5, 1424: 5, 1600: 5, 1601: 8
+  }],
+  CAR.ACCORD_NIDEC_HYBRID: [{
+    57: 3, 145: 8, 304: 8, 342: 6, 344: 8, 380: 8, 387: 8, 388: 8, 392: 6, 398: 3, 399: 3, 420: 8, 422: 8, 427: 3, 432: 7, 464: 8, 490: 8, 506: 8, 512: 4, 513: 6, 520: 8, 521: 8, 531: 8, 533: 8, 537: 8, 660: 8, 661: 4, 773: 7, 777: 8, 780: 8, 800: 8, 804: 8, 808: 8, 829: 5, 832: 3, 884: 8, 892: 8, 900: 7, 901: 8, 904: 8, 927: 8, 929: 8, 954: 2, 985: 3, 1024: 5, 1027: 5, 1029: 8, 1030: 5, 1036: 8, 1039: 8, 1057: 5, 1108: 8, 1296: 8, 1322: 5, 1341: 5, 1365: 5, 1429: 5, 1600: 5, 1601: 8, 1604: 5, 1605: 8, 1606: 5, 1607: 8, 1608: 5, 1609: 8
   }],
   CAR.ACURA_RDX: [{
     57: 3, 145: 8, 229: 4, 308: 5, 316: 8, 342: 6, 344: 8, 380: 8, 392: 6, 398: 3, 399: 6, 404: 4, 420: 8, 422: 8, 426: 8, 432: 7, 464: 8, 474: 5, 476: 4, 487: 4, 490: 8, 506: 8, 512: 6, 513: 6, 542: 7, 545: 4, 597: 8, 660: 8, 773: 7, 777: 8, 780: 8, 800: 8, 804: 8, 808: 8, 819: 7, 821: 5, 829: 5, 882: 2, 884: 7, 887: 8, 888: 8, 892: 8, 923: 2, 929: 4, 963: 8, 965: 8, 966: 8, 967: 8, 983: 8, 985: 3, 1024: 5, 1027: 5, 1029: 8, 1033: 5, 1034: 5, 1036: 8, 1039: 8, 1057: 5, 1064: 7, 1108: 8, 1365: 5, 1424: 5, 1729: 1
@@ -375,6 +393,39 @@ FW_VERSIONS = {
     (Ecu.unknown, 0x18da3af1, None): [
       b'39390-TVA-A120\x00\x00',
     ],
+  },
+  CAR.ACCORD_NIDEC: {
+    (Ecu.vsa, 0x18DA28F1, None): [
+      b'57114-T2F-X840\x00\x00',
+    ],
+    (Ecu.fwdRadar, 0x18DAB0F1, None): [
+      b'36161-T2F-A140\x00\x00',
+    ],
+    (Ecu.combinationMeter, 0x18DA60F1, None): [
+      b'78109-T2F-L110\x00\x00',
+    ],
+    (Ecu.srs, 0x18DA53F1, None): [
+      b'77959-T2F-A030\x00\x00',
+    ],
+  }, 
+  CAR.ACCORD_NIDEC_HYBRID: {
+    (Ecu.vsa, 0x18DA28F1, None): [
+      b'57114-T3Z-A040\x00\x00',
+      b'57114-T3Z-A050\x00\x00',
+      b'57114-T3Z-A060\x00\x00',
+    ],
+    (Ecu.gateway, 0x18DAEFF1, None): [
+      b'38897-T3W-0130\x00\x00',
+    ],
+    (Ecu.fwdRadar, 0x18DAB0F1, None): [
+      b'36161-T3Z-A830\x00\x00',
+    ],
+    (Ecu.combinationMeter, 0x18DA60F1, None): [
+      b'78109-T3Z-A220\x00\x00',
+    ],
+    (Ecu.srs, 0x18DA53F1, None): [
+      b'77959-T3Z-A020\x00\x00',
+    ]
   },
   CAR.CIVIC: {
     (Ecu.programmedFuelInjection, 0x18da10f1, None): [
@@ -1308,6 +1359,8 @@ DBC = {
   CAR.ACCORD_2021: dbc_dict('honda_accord_2018_can_generated', None),
   CAR.ACCORDH: dbc_dict('honda_accord_2018_can_generated', None),
   CAR.ACCORDH_2021: dbc_dict('honda_accord_2018_can_generated', None),
+  CAR.ACCORD_NIDEC: dbc_dict('honda_accord_touring_2016_can', 'acura_ilx_2016_nidec'),  
+  CAR.ACCORD_NIDEC_HYBRID: dbc_dict('honda_accord_touring_hybrid_2017_can', 'acura_ilx_2016_nidec'),
   CAR.ACURA_ILX: dbc_dict('acura_ilx_2016_can_generated', 'acura_ilx_2016_nidec'),
   CAR.ACURA_RDX: dbc_dict('acura_rdx_2018_can_generated', 'acura_ilx_2016_nidec'),
   CAR.ACURA_RDX_3G: dbc_dict('acura_rdx_2020_can_generated', None),
@@ -1332,6 +1385,8 @@ STEER_THRESHOLD = {
   # default is 1200, overrides go here
   CAR.ACURA_RDX: 400,
   CAR.CRV_EU: 400,
+  CAR.ACCORD_NIDEC: 25,
+  CAR.ACCORD_NIDEC_HYBRID: 25,
 }
 
 # TODO: is this real?
@@ -1350,3 +1405,5 @@ HONDA_BOSCH_ALT_BRAKE_SIGNAL = set([CAR.ACCORD, CAR.ACCORD_2021, CAR.CRV_5G, CAR
 
 # Bosch models with alternate set of LKAS_HUD messages
 HONDA_BOSCH_EXT = set([CAR.ACCORD_2021, CAR.ACCORDH_2021])
+
+SERIAL_STEERING = set([CAR.ACCORD_NIDEC, CAR.ACCORD_NIDEC_HYBRID])
