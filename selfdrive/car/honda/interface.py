@@ -189,7 +189,7 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 3279. * CV.LB_TO_KG + STD_CARGO_KG
       ret.wheelbase = 2.75
       ret.centerToFront = ret.wheelbase * 0.39
-      ret.steerRatio = 13.6 # 13.37 is spec
+      ret.steerRatio = 13.66 # 13.37 is spec
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 238], [0, 238]]
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.27], [0.07]]      
       ret.lateralTuning.pid.kf = 0.000025
@@ -205,7 +205,7 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 3536. * CV.LB_TO_KG + STD_CARGO_KG
       ret.wheelbase = 2.75
       ret.centerToFront = ret.wheelbase * 0.39
-      ret.steerRatio = 13.6 # 13.37 is spec
+      ret.steerRatio = 13.66 # 13.37 is spec
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 238], [0, 238]]
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.28], [0.07]]      
       ret.lateralTuning.pid.kf = 0.000025
