@@ -64,6 +64,48 @@ def apply_std_steer_torque_limits(apply_torque, apply_torque_last, driver_torque
   return int(round(float(apply_torque)))
 
 
+def apply_serial_steering_torque_mod(apply_steer, apply_steer_warning_counter, apply_steer_cooldown_counter):
+  TORQUE_STEERING_LIMIT = 229
+  TORQUE_WARNING_STEERING_LIMIT = 238
+  TORQUE_STEERING_CAP = 250
+  TORQUE_WARNING_COUNTER = 3
+  TORQUE_COOLDOWN_MIN = 2
+  TORQUE_MULTIPLIER = 1
+
+  # Start with old steer copy
+  new_steer = apply_steer
+
+  # When getting near max steering torque limits, start to artifically increase torque beyond normal
+  if (apply_steer > TORQUE_STEERING_LIMIT) or (apply_steer < -TORQUE_STEERING_LIMIT):
+    # Apply correct formula based on postive/negative apply_steer
+    if apply_steer > TORQUE_STEERING_LIMIT: 
+      apply_steer = min(int(round((apply_steer - TORQUE_STEERING_LIMIT) * TORQUE_MULTIPLIER)) + apply_steer, TORQUE_STEERING_CAP)
+    else:
+      apply_steer = max(int(round((apply_steer + TORQUE_STEERING_LIMIT) * TORQUE_MULTIPLIER)) + apply_steer, -TORQUE_STEERING_CAP)
+    # If the steering torque is past normal limits, count frames for warnings 
+    # Reset the steering torque when the warning counter is too high
+    if (apply_steer > TORQUE_WARNING_STEERING_LIMIT) or (apply_steer < -TORQUE_WARNING_STEERING_LIMIT):
+      apply_steer_warning_counter += 1
+      if (apply_steer_warning_counter >= TORQUE_WARNING_COUNTER):
+        # apply torque limits steering backup before EPS error
+        apply_steer = new_steer
+        apply_steer_cooldown_counter += 1
+        # reset the torque warning after cooldown is done 
+        if apply_steer_cooldown_counter >= TORQUE_COOLDOWN_MIN:
+          apply_steer_warning_counter = 0
+          apply_steer_cooldown_counter = 0
+      else:
+        apply_steer_warning_counter = 0
+        apply_steer_cooldown_counter = 0
+    else:
+      # Normal torque range
+      apply_steer_warning_counter = 0
+      apply_steer_cooldown_counter = 0
+
+  return new_steer
+
+
+
 def apply_toyota_steer_torque_limits(apply_torque, apply_torque_last, motor_torque, LIMITS):
   # limits due to comparison of commanded torque VS motor reported torque
   max_lim = min(max(motor_torque + LIMITS.STEER_ERROR_MAX, LIMITS.STEER_ERROR_MAX), LIMITS.STEER_MAX)
