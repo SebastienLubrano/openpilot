@@ -65,12 +65,12 @@ def apply_std_steer_torque_limits(apply_torque, apply_torque_last, driver_torque
 
 
 def apply_serial_steering_torque_mod(apply_steer, apply_steer_warning_counter, apply_steer_cooldown_counter):
-  TORQUE_STEERING_LIMIT = 229
+  TORQUE_STEERING_LIMIT = 230
   TORQUE_WARNING_STEERING_LIMIT = 238
   TORQUE_STEERING_CAP = 250
-  TORQUE_WARNING_COUNTER = 3
-  TORQUE_COOLDOWN_MIN = 2
-  TORQUE_MULTIPLIER = 1
+  TORQUE_WARNING_COUNTER = 4
+  TORQUE_COOLDOWN_MIN = 1
+  TORQUE_MULTIPLIER = 1.25
 
   # Start with old steer copy
   new_steer = apply_steer
