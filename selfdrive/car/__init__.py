@@ -70,7 +70,7 @@ def apply_serial_steering_torque_mod(apply_steer, apply_steer_warning_counter, a
   TORQUE_STEERING_CAP = 250
   TORQUE_WARNING_COUNTER = 4
   TORQUE_COOLDOWN_MIN = 1
-  TORQUE_MULTIPLIER = 1.25
+  TORQUE_MULTIPLIER = 1.3
 
   # Start with old steer copy
   new_steer = apply_steer
