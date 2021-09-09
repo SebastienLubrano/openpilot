@@ -82,7 +82,6 @@ def apply_serial_steering_torque_mod(apply_steer, apply_steer_warning_counter, a
       apply_steer = min(int(round((apply_steer - TORQUE_STEERING_LIMIT) * TORQUE_MULTIPLIER)) + apply_steer, TORQUE_STEERING_CAP)
     else:
       apply_steer = max(int(round((apply_steer + TORQUE_STEERING_LIMIT) * TORQUE_MULTIPLIER)) + apply_steer, -TORQUE_STEERING_CAP)
-    # If the steering torque is past normal limits, count frames for warnings 
     # Reset the steering torque when the warning counter is too high
     if (apply_steer > TORQUE_WARNING_STEERING_LIMIT) or (apply_steer < -TORQUE_WARNING_STEERING_LIMIT):
       apply_steer_warning_counter += 1
