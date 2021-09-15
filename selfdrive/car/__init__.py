@@ -65,11 +65,11 @@ def apply_std_steer_torque_limits(apply_torque, apply_torque_last, driver_torque
 
 
 def apply_serial_steering_torque_mod(apply_steer, steer_warning_counter, steer_cooldown_counter):
-  TORQUE_WARNING = 125
+  TORQUE_WARNING = 120
   TORQUE_OVERCLOCK = 238
-  TORQUE_STEERING_CAP = 250
+  TORQUE_STEERING_CAP = 238
   TORQUE_WARNING_COUNTER = 4
-  TORQUE_COOLDOWN = 1
+  TORQUE_COOLDOWN = 2
   TORQUE_MULTIPLIER = 1.05
 
   # Start with old steer copy
@@ -79,11 +79,9 @@ def apply_serial_steering_torque_mod(apply_steer, steer_warning_counter, steer_c
   if (new_steer > TORQUE_WARNING) or (new_steer < -TORQUE_WARNING):
     # Apply correct formula based on postive/negative apply_steer
     if new_steer > TORQUE_WARNING: 
-      new_steer = min(int(round(new_steer * TORQUE_MULTIPLIER)) + new_steer, TORQUE_STEERING_CAP)
-      # old - new_steer = min(int(round((new_steer - TORQUE_WARNING) * TORQUE_MULTIPLIER)) + new_steer, TORQUE_STEERING_CAP)
+      new_steer = min(int(round(new_steer * TORQUE_MULTIPLIER)), TORQUE_STEERING_CAP)
     else:
-      new_steer = max(int(round(new_steer * TORQUE_MULTIPLIER)) + new_steer, -TORQUE_STEERING_CAP)
-      # old - new_steer = max(int(round((new_steer + TORQUE_WARNING) * TORQUE_MULTIPLIER)) + new_steer, -TORQUE_STEERING_CAP)
+      new_steer = max(int(round(new_steer * TORQUE_MULTIPLIER)), -TORQUE_STEERING_CAP)
     # Reset the steering torque when the warning counter is too high
     if (new_steer > TORQUE_OVERCLOCK) or (new_steer < -TORQUE_OVERCLOCK):
       steer_warning_counter += 1
