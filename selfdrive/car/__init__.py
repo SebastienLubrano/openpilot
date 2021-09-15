@@ -64,8 +64,8 @@ def apply_std_steer_torque_limits(apply_torque, apply_torque_last, driver_torque
   return int(round(float(apply_torque)))
 
 
-def apply_serial_steering_torque_mod(apply_steer, apply_steer_warning_counter, apply_steer_cooldown_counter):
-  TORQUE_WARNING = 228
+def apply_serial_steering_torque_mod(apply_steer, steer_warning_counter, steer_cooldown_counter):
+  TORQUE_WARNING = 125
   TORQUE_OVERCLOCK = 238
   TORQUE_STEERING_CAP = 250
   TORQUE_WARNING_COUNTER = 4
@@ -76,33 +76,33 @@ def apply_serial_steering_torque_mod(apply_steer, apply_steer_warning_counter, a
   new_steer = apply_steer
 
   # When getting near max steering torque limits, start to artifically increase torque beyond normal
-  if (apply_steer > TORQUE_WARNING) or (apply_steer < -TORQUE_WARNING):
+  if (new_steer > TORQUE_WARNING) or (new_steer < -TORQUE_WARNING):
     # Apply correct formula based on postive/negative apply_steer
-    if apply_steer > TORQUE_WARNING: 
-      apply_steer = min(int(round(apply_steer * TORQUE_MULTIPLIER)) + apply_steer, TORQUE_STEERING_CAP)
-      # old - apply_steer = min(int(round((apply_steer - TORQUE_WARNING) * TORQUE_MULTIPLIER)) + apply_steer, TORQUE_STEERING_CAP)
+    if new_steer > TORQUE_WARNING: 
+      new_steer = min(int(round(new_steer * TORQUE_MULTIPLIER)) + new_steer, TORQUE_STEERING_CAP)
+      # old - new_steer = min(int(round((new_steer - TORQUE_WARNING) * TORQUE_MULTIPLIER)) + new_steer, TORQUE_STEERING_CAP)
     else:
-      apply_steer = max(int(round(apply_steer * TORQUE_MULTIPLIER)) + apply_steer, -TORQUE_STEERING_CAP)
-      # old - apply_steer = max(int(round((apply_steer + TORQUE_WARNING) * TORQUE_MULTIPLIER)) + apply_steer, -TORQUE_STEERING_CAP)
+      new_steer = max(int(round(new_steer * TORQUE_MULTIPLIER)) + new_steer, -TORQUE_STEERING_CAP)
+      # old - new_steer = max(int(round((new_steer + TORQUE_WARNING) * TORQUE_MULTIPLIER)) + new_steer, -TORQUE_STEERING_CAP)
     # Reset the steering torque when the warning counter is too high
-    if (apply_steer > TORQUE_OVERCLOCK) or (apply_steer < -TORQUE_OVERCLOCK):
-      apply_steer_warning_counter += 1
-      if (apply_steer_warning_counter >= TORQUE_WARNING_COUNTER):
+    if (new_steer > TORQUE_OVERCLOCK) or (new_steer < -TORQUE_OVERCLOCK):
+      steer_warning_counter += 1
+      if (steer_warning_counter >= TORQUE_WARNING_COUNTER):
         # apply torque limits steering backup before EPS error & cooldown
-        apply_steer = new_steer
-        apply_steer_cooldown_counter += 1
+        new_steer = TORQUE_OVERCLOCK if new_steer > 0 else -TORQUE_OVERCLOCK
+        steer_cooldown_counter += 1
         # reset the torque warning after cooldown is done 
-        if apply_steer_cooldown_counter >= TORQUE_COOLDOWN:
-          apply_steer_warning_counter = 0
-          apply_steer_cooldown_counter = 0
+        if steer_cooldown_counter >= TORQUE_COOLDOWN:
+          steer_warning_counter = 0
+          steer_cooldown_counter = 0
     else:
       # Normal torque range (near warning)
-      apply_steer_warning_counter = 0
-      apply_steer_cooldown_counter = 0
+      steer_warning_counter = 0
+      steer_cooldown_counter = 0
   else:
     # Normal torque range (low)
-    apply_steer_warning_counter = 0
-    apply_steer_cooldown_counter = 0
+    steer_warning_counter = 0
+    steer_cooldown_counter = 0
 
   return new_steer
 
