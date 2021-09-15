@@ -144,12 +144,11 @@ class CarController():
 
      # Serial steering torque mod (experimental, possible LKAS errors)
     if (CS.CP.carFingerprint in SERIAL_STEERING):
+      new_steer = int(round(apply_steer))
+      apply_steer = apply_std_steer_torque_limits(new_steer, self.apply_steer_last, CS.out.steeringTorque, self.params)
       apply_steer = apply_serial_steering_torque_mod(apply_steer, self.apply_steer_warning_counter, self.apply_steer_cooldown_counter)
-      # new_steer = int(round(apply_steer))
-      # apply_steer = apply_std_steer_torque_limits(new_steer, self.apply_steer_last, CS.out.steeringTorque, self.params)
-      # self.apply_steer_last = apply_steer
+      self.apply_steer_last = apply_steer
       
-
     # steer torque is converted back to CAN reference (positive when steering right)
     apply_steer = -apply_steer
 
