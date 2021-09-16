@@ -76,7 +76,6 @@ def apply_serial_steering_torque_mod(apply_steer, steer_warning_counter, steer_c
   # Start with old steer copy
   new_steer = apply_steer
 
-
   # When getting near max steering torque limits, start to artifically increase torque beyond normal
   if (new_steer > TORQUE_WARNING) or (new_steer < -TORQUE_WARNING):
     # Apply correct formula based on postive/negative apply_steer

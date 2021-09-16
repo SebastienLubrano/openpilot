@@ -146,10 +146,6 @@ class CarController():
     # steer torque is converted back to CAN reference (positive when steering right)
     apply_steer = -apply_steer
 
-    # Serial steering torque mod (experimental, possible LKAS errors)
-    # if (CS.CP.carFingerprint in SERIAL_STEERING):
-    #     apply_steer = apply_serial_steering_torque_mod(apply_steer, self.apply_steer_warning_counter, self.apply_steer_cooldown_counter)
-
     # Send CAN commands.
     can_sends = []
 
