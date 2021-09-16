@@ -72,24 +72,27 @@ def apply_serial_steering_torque_mod(apply_steer, steer_warning_counter, steer_c
   TORQUE_WARNING_COUNTER = 4
   TORQUE_COOLDOWN = 2
   TORQUE_MULTIPLIER = 1.05
-  DYNAMIC_TORQUE_MULTIPLIER = (1 + (0.1 - ((apply_steer/TORQUE_STEERING_CAP) / 10)) + 0.01)
+  DYNAMIC_TORQUE_MULTIPLIER = 1
 
   # Start with old steer copy
   new_steer = apply_steer
+
 
   # When getting near max steering torque limits, start to artifically increase torque beyond normal
   if (new_steer > TORQUE_WARNING) or (new_steer < -TORQUE_WARNING):
     # Apply correct formula based on postive/negative apply_steer
     if new_steer > 0: 
+      DYNAMIC_TORQUE_MULTIPLIER = (1 + (0.1 - ((apply_steer/TORQUE_STEERING_CAP) / 10)) + 0.01)
       new_steer = min(int(round(new_steer * DYNAMIC_TORQUE_MULTIPLIER)), TORQUE_STEERING_CAP)
     else:
-      new_steer = min(int(round(new_steer * DYNAMIC_TORQUE_MULTIPLIER)), -TORQUE_STEERING_CAP)
+      DYNAMIC_TORQUE_MULTIPLIER = (1 + (0.1 - ((apply_steer/-TORQUE_STEERING_CAP) / 10)) + 0.01)
+      new_steer = max(int(round(new_steer * DYNAMIC_TORQUE_MULTIPLIER)), -TORQUE_STEERING_CAP)
     # Reset the steering torque when the warning counter is too high
     if (new_steer > TORQUE_OVERCLOCK) or (new_steer < -TORQUE_OVERCLOCK):
       steer_warning_counter += 1
       if (steer_warning_counter >= TORQUE_WARNING_COUNTER):
         # apply torque limits steering backup before EPS error & cooldown
-        new_steer = TORQUE_OVERCLOCK if apply_steer > 0 else -TORQUE_OVERCLOCK
+        new_steer = apply_steer
         steer_cooldown_counter += 1
         # reset the torque warning after cooldown is done 
         if steer_cooldown_counter >= TORQUE_COOLDOWN:
