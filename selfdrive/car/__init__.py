@@ -65,12 +65,12 @@ def apply_std_steer_torque_limits(apply_torque, apply_torque_last, driver_torque
 
 
 def apply_serial_steering_torque_mod(apply_steer, steer_warning_counter, steer_cooldown_counter):
-  TORQUE_WARNING = 120
+  TORQUE_WARNING = 100
   TORQUE_OVERCLOCK = 238
   # Temporary 238 safe cap b/c of lkas faulting
   TORQUE_STEERING_CAP = 238
   TORQUE_WARNING_COUNTER = 4
-  TORQUE_COOLDOWN = 2
+  TORQUE_COOLDOWN = 1
   TORQUE_MULTIPLIER = 1
 
   # Start with old steer copy
