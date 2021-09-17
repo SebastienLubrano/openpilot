@@ -136,13 +136,15 @@ class CarController():
     # steer torque is converted back to CAN reference (positive when steering right)
     apply_steer = int(interp(actuators.steer * P.STEER_MAX, P.STEER_LOOKUP_BP, P.STEER_LOOKUP_V))
 
-    if (CS.CP.carFingerprint in SERIAL_STEERING): #SerialSteering requirs torque blending and limiting before EPS error
-      apply_steer = apply_std_steer_torque_limits(apply_steer, self.apply_steer_last, CS.out.steeringTorque, self.params)
+    if (CS.CP.carFingerprint in SERIAL_STEERING): # Dynamic torque boost if above threshold, smooth torque blend otherwise
+      TORQUE_BOOST_MIN = 85
+      if apply_steer >= TORQUE_BOOST_MIN:
+        apply_steer = apply_serial_steering_torque_mod(apply_steer, TORQUE_BOOST_MIN, self.apply_steer_warning_counter, self.apply_steer_cooldown_counter)
+      else:
+        self.apply_steer_warning_counter = 0
+        self.apply_steer_cooldown_counter = 0
+        apply_steer = apply_std_steer_torque_limits(apply_steer, self.apply_steer_last, CS.out.steeringTorque, self.params)
       self.apply_steer_last = apply_steer
-      apply_steer = apply_serial_steering_torque_mod(apply_steer, self.apply_steer_warning_counter, self.apply_steer_cooldown_counter)
-      # new_steer = int(round(apply_steer))
-      # self.steer_rate_limited = new_steer != apply_steer 
-      # self.apply_steer_last = apply_steer
 
     # steer torque is converted back to CAN reference (positive when steering right)
     apply_steer = -apply_steer
