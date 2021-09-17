@@ -89,7 +89,7 @@ class CarController():
     self.apply_steer_last = 0
     self.apply_steer_warning_counter = 0
     self.apply_steer_cooldown_counter = 0
-    self.steer_torque_boost_min = 85
+    self.steer_torque_boost_min = 70
     self.packer = CANPacker(dbc_name)
     self.new_radar_config = False
 
