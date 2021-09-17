@@ -89,6 +89,7 @@ class CarController():
     self.apply_steer_last = 0
     self.apply_steer_warning_counter = 0
     self.apply_steer_cooldown_counter = 0
+    self.steer_torque_boost_min = 85
     self.packer = CANPacker(dbc_name)
     self.new_radar_config = False
 
@@ -137,9 +138,8 @@ class CarController():
     apply_steer = int(interp(actuators.steer * P.STEER_MAX, P.STEER_LOOKUP_BP, P.STEER_LOOKUP_V))
 
     if (CS.CP.carFingerprint in SERIAL_STEERING): # Dynamic torque boost if above threshold, smooth torque blend otherwise
-      TORQUE_BOOST_MIN = 85
-      if apply_steer >= TORQUE_BOOST_MIN:
-        apply_steer = apply_serial_steering_torque_mod(apply_steer, TORQUE_BOOST_MIN, self.apply_steer_warning_counter, self.apply_steer_cooldown_counter)
+      if apply_steer >= self.steer_torque_boost_min:
+        apply_steer = apply_serial_steering_torque_mod(apply_steer, self.steer_torque_boost_min, self.apply_steer_warning_counter, self.apply_steer_cooldown_counter)
       else:
         self.apply_steer_warning_counter = 0
         self.apply_steer_cooldown_counter = 0
