@@ -64,7 +64,8 @@ def apply_std_steer_torque_limits(apply_torque, apply_torque_last, driver_torque
   return int(round(float(apply_torque)))
 
 
-def apply_serial_steering_torque_mod(apply_steer, torque_boost_min, steer_warning_counter, steer_cooldown_counter):
+def apply_serial_steering_torque_mod(apply_steer, torque_boost_min, steer_torque_limited, steer_warning_counter, steer_cooldown_counter):
+  TORQUE_LIMITED_CAP = 50
   TORQUE_OVERCLOCK = 238
   TORQUE_STEERING_CAP = 238
   TORQUE_WARNING_COUNTER = 4
@@ -102,6 +103,10 @@ def apply_serial_steering_torque_mod(apply_steer, torque_boost_min, steer_warnin
     # Normal torque range (low)
     steer_warning_counter = 0
     steer_cooldown_counter = 0
+  
+  # Add low steering torque cap for low speeds, manual turning, & manual interventions
+  if (steer_torque_limited and (new_steer > 50 or new_steer < -50)):
+    new_steer = TORQUE_LIMITED_CAP if new_steer > 0 else -TORQUE_LIMITED_CAP
 
   return new_steer
 
