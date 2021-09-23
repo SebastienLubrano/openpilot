@@ -139,7 +139,7 @@ class CarController():
 
     if (CS.CP.carFingerprint in SERIAL_STEERING): # Dynamic torque boost if above threshold, smooth torque blend otherwise
       if (apply_steer >= self.steer_torque_boost_min) or (apply_steer <= -self.steer_torque_boost_min):
-        apply_steer = apply_serial_steering_torque_mod(apply_steer, self.steer_torque_boost_min, self.apply_steer_warning_counter, self.apply_steer_cooldown_counter)
+        apply_steer = apply_serial_steering_torque_mod(apply_steer, self.apply_steer_warning_counter, self.apply_steer_cooldown_counter)
       else:
         apply_steer = apply_std_steer_torque_limits(apply_steer, self.apply_steer_last, CS.out.steeringTorque, self.params)
         self.apply_steer_warning_counter = 0
