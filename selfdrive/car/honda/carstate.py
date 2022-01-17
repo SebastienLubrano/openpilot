@@ -6,7 +6,7 @@ from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
 from selfdrive.config import Conversions as CV
 from selfdrive.car.interfaces import CarStateBase
-from selfdrive.car.honda.values import CAR, DBC, STEER_THRESHOLD, HONDA_BOSCH, HONDA_NIDEC_ALT_SCM_MESSAGES, HONDA_BOSCH_ALT_BRAKE_SIGNAL
+from selfdrive.car.honda.values import CAR, DBC, STEER_THRESHOLD, HONDA_BOSCH, HONDA_NIDEC_ALT_SCM_MESSAGES, HONDA_BOSCH_ALT_BRAKE_SIGNAL, SERIAL_STEERING
 
 TransmissionType = car.CarParams.TransmissionType
 
@@ -54,7 +54,16 @@ def get_can_signals(CP, gearbox_msg, main_on_sig_msg):
     ("STEER_MOTOR_TORQUE", 0), # TODO: not on every car
   ]
 
-  if CP.carFingerprint == CAR.ODYSSEY_CHN:
+  if CP.carFingerprint in SERIAL_STEERING:
+    checks += [
+      ("STEER_STATUS", 0), #SerialSteering doesn't have this - only on cp_cam
+    ]
+  else:
+    checks += [
+      ("STEER_STATUS", 100)
+    ]
+
+  if CP.carFingerprint in (CAR.ODYSSEY_CHN, CAR.ACCORD_NIDEC, CAR.ACCORD_NIDEC_HYBRID):
     checks += [
       ("SCM_FEEDBACK", 25),
       ("SCM_BUTTONS", 50),
@@ -103,7 +112,7 @@ def get_can_signals(CP, gearbox_msg, main_on_sig_msg):
     signals += [("CRUISE_SPEED_PCM", "CRUISE", 0),
                 ("CRUISE_SPEED_OFFSET", "CRUISE_PARAMS", 0)]
 
-    if CP.carFingerprint == CAR.ODYSSEY_CHN:
+    if CP.carFingerprint in (CAR.ODYSSEY_CHN, CAR.ACCORD_NIDEC, CAR.ACCORD_NIDEC_HYBRID):
       checks += [("CRUISE_PARAMS", 10)]
     else:
       checks += [("CRUISE_PARAMS", 50)]
@@ -264,8 +273,12 @@ class CarState(CarStateBase):
     else:
       ret.gasPressed = ret.gas > 1e-5
 
-    ret.steeringTorque = cp.vl["STEER_STATUS"]["STEER_TORQUE_SENSOR"]
-    ret.steeringTorqueEps = cp.vl["STEER_MOTOR_TORQUE"]["MOTOR_TORQUE"]
+    if self.CP.carFingerprint in SERIAL_STEERING:
+      ret.steeringTorque = cp_cam.vl["STEER_STATUS"]['STEER_TORQUE_SENSOR']
+      ret.steeringTorqueEps = cp_cam.vl["STEER_MOTOR_TORQUE"]['MOTOR_TORQUE']
+    else:
+      ret.steeringTorque = cp.vl["STEER_STATUS"]['STEER_TORQUE_SENSOR']
+      ret.steeringTorqueEps = cp.vl["STEER_MOTOR_TORQUE"]['MOTOR_TORQUE']   
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD.get(self.CP.carFingerprint, 1200)
 
     if self.CP.carFingerprint in HONDA_BOSCH:
@@ -347,13 +360,20 @@ class CarState(CarStateBase):
     ret.steerWarning = False
 
     if self.lkasEnabled:
-      steer_status = self.steer_status_values[cp.vl["STEER_STATUS"]["STEER_STATUS"]]
+      if self.CP.carFingerprint in SERIAL_STEERING:
+        steer_status = self.steer_status_values[cp_cam.vl["STEER_STATUS"]['STEER_STATUS']]
+      else:
+        steer_status = self.steer_status_values[cp.vl["STEER_STATUS"]["STEER_STATUS"]]
       ret.steerError = steer_status not in ["NORMAL", "NO_TORQUE_ALERT_1", "NO_TORQUE_ALERT_2", "LOW_SPEED_LOCKOUT", "TMP_FAULT"]
       # NO_TORQUE_ALERT_2 can be caused by bump OR steering nudge from driver
       self.steer_not_allowed = steer_status not in ["NORMAL", "NO_TORQUE_ALERT_2"]
       # LOW_SPEED_LOCKOUT is not worth a warning
       if (self.automaticLaneChange and not self.belowLaneChangeSpeed and (self.rightBlinkerOn or self.leftBlinkerOn)) or not (self.rightBlinkerOn or self.leftBlinkerOn):
         ret.steerWarning = steer_status not in ["NORMAL", "LOW_SPEED_LOCKOUT", "NO_TORQUE_ALERT_2"]
+      # User steering input above a certain threshold should cancel computer steering temporarily
+      if self.CP.carFingerprint in (CAR.ACCORD_NIDEC, CAR.ACCORD_NIDEC_HYBRID):
+        self.steer_not_allowed = True if bool(abs(ret.steeringTorque) >= 50) else self.steer_not_allowed
+        self.steer_torque_limited = True if bool(abs(ret.steeringTorque) >= 50) else self.steer_torque_limited
 
     # TODO: discover the CAN msg that has the imperial unit bit for all other cars
     if self.CP.carFingerprint in (CAR.CIVIC, ):
@@ -395,6 +415,13 @@ class CarState(CarStateBase):
     checks = [
       ("STEERING_CONTROL", 100),
     ]
+
+    if CP.carFingerprint in SERIAL_STEERING:
+      checks += [("STEER_MOTOR_TORQUE", 100), 
+                ("STEER_STATUS", 100)]
+      signals += [("MOTOR_TORQUE", "STEER_MOTOR_TORQUE", 0),
+                  ("STEER_TORQUE_SENSOR", "STEER_STATUS", 0),
+                  ("STEER_STATUS", "STEER_STATUS", 0)]
 
     if CP.carFingerprint not in HONDA_BOSCH:
       signals += [("COMPUTER_BRAKE", "BRAKE_COMMAND", 0),
