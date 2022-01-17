@@ -50,7 +50,6 @@ def get_can_signals(CP, gearbox_msg, main_on_sig_msg):
     ("CRUISE", 10),
     ("POWERTRAIN_DATA", 100),
     ("VSA_STATUS", 50),
-    ("STEER_STATUS", 100),
     ("STEER_MOTOR_TORQUE", 0), # TODO: not on every car
   ]
 
@@ -145,6 +144,14 @@ def get_can_signals(CP, gearbox_msg, main_on_sig_msg):
   elif CP.carFingerprint in (CAR.ODYSSEY, CAR.ODYSSEY_CHN):
     signals += [("EPB_STATE", "EPB_STATUS", 0)]
     checks += [("EPB_STATUS", 50)]
+  elif CP.carFingerprint in (CAR.ACCORD_NIDEC, CAR.ACCORD_NIDEC_HYBRID, CAR.V6ACCORD_NIDEC):
+    signals += [("MAIN_ON", "SCM_BUTTONS", 0),
+                ("CAR_GAS", "GAS_PEDAL", 0)]
+    checks += [("GAS_PEDAL", 100)]
+  elif CP.carFingerprint == CAR.ACURA_MDX_HYBRID:
+    signals += [("MAIN_ON", "SCM_BUTTONS", 0),
+                ("CAR_GAS", "GAS_PEDAL", 0)] #WHY ISNT THIS HERE? 
+    checks += [("GAS_PEDAL", 0)]
 
   # add gas interceptor reading if we are using it
   if CP.enableGasInterceptor:
@@ -240,6 +247,7 @@ class CarState(CarStateBase):
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
 
     self.belowLaneChangeSpeed = ret.vEgo < (30 * CV.MPH_TO_MS)
+    self.steer_torque_limited = ret.vEgo < (4 * CV.MPH_TO_MS)
 
     ret.steeringAngleDeg = cp.vl["STEERING_SENSORS"]["STEER_ANGLE"]
     ret.steeringRateDeg = cp.vl["STEERING_SENSORS"]["STEER_ANGLE_RATE"]
@@ -372,8 +380,8 @@ class CarState(CarStateBase):
         ret.steerWarning = steer_status not in ["NORMAL", "LOW_SPEED_LOCKOUT", "NO_TORQUE_ALERT_2"]
       # User steering input above a certain threshold should cancel computer steering temporarily
       if self.CP.carFingerprint in (CAR.ACCORD_NIDEC, CAR.ACCORD_NIDEC_HYBRID):
-        self.steer_not_allowed = True if bool(abs(ret.steeringTorque) >= 50) else self.steer_not_allowed
-        self.steer_torque_limited = True if bool(abs(ret.steeringTorque) >= 50) else self.steer_torque_limited
+        self.steer_not_allowed = True if bool(abs(ret.steeringTorque) >= 60) else self.steer_not_allowed
+        self.steer_torque_limited = True if bool(abs(ret.steeringTorque) >= 60) else self.steer_torque_limited
 
     # TODO: discover the CAN msg that has the imperial unit bit for all other cars
     if self.CP.carFingerprint in (CAR.CIVIC, ):
