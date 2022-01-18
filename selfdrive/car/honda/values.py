@@ -37,17 +37,20 @@ class CarControllerParams():
     assert(CP.lateralParams.torqueBP[0] == 0)
     self.STEER_LOOKUP_BP = [v * -1 for v in CP.lateralParams.torqueBP][1:][::-1] + list(CP.lateralParams.torqueBP)
     self.STEER_LOOKUP_V = [v * -1 for v in CP.lateralParams.torqueV][1:][::-1] + list(CP.lateralParams.torqueV)
-    #Need 
-    self.STEER_DELTA_UP = 7
-    self.STEER_DELTA_DOWN = 14
-    self.STEER_DRIVER_ALLOWANCE = 20
-    self.STEER_DRIVER_MULTIPLIER = 1
-    self.STEER_DRIVER_FACTOR = 4
 
 
 class HondaFlags(IntFlag):
   # Bosch models with alternate set of LKAS_HUD messages
   BOSCH_EXT_HUD = 1
+
+class LKAS_LIMITS:
+  STEER_MAX = 238
+  STEER_THRESHOLD = 15
+  STEER_DELTA_UP = 10
+  STEER_DELTA_DOWN = 14
+  STEER_DRIVER_ALLOWANCE = 25
+  STEER_DRIVER_MULTIPLIER = 13
+  STEER_DRIVER_FACTOR = 1
 
 
 # Car button codes
