@@ -106,10 +106,6 @@ class CarController():
     self.apply_brake_last = 0
     self.last_pump_ts = 0.
     self.apply_steer_last = 0
-    self.apply_steer_last_ti = 0
-    self.apply_steer_warning_counter = 0
-    self.apply_steer_cooldown_counter = 0
-    self.steer_torque_boost_min = 70
     self.packer = CANPacker(dbc_name)
 
     self.params = CarControllerParams(CP)
