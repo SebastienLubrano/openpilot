@@ -18,8 +18,9 @@ def get_lkas_cmd_bus(car_fingerprint, radar_disabled=False):
   # normally steering commands are sent to radar, which forwards them to powertrain bus
   return 0
 
-def create_brake_command(packer, apply_brake, pump_on, pcm_override, pcm_cancel_cmd, fcw, idx, car_fingerprint, stock_brake):
+def create_brake_command(packer, apply_brake, pcm_override, pcm_cancel_cmd, fcw, idx, car_fingerprint, stock_brake):
   # TODO: do we loose pressure if we keep pump off for long?
+  pump_on = apply_brake > 0
   brakelights = apply_brake > 0
   brake_rq = apply_brake > 0
   pcm_fault_cmd = False
@@ -84,6 +85,7 @@ def create_steering_control(packer, apply_steer, lkas_active, car_fingerprint, i
     "STEER_TORQUE_REQUEST": lkas_active,
   }
   bus = 2 if car_fingerprint in SERIAL_STEERING else get_lkas_cmd_bus(car_fingerprint, radar_disabled)
+
   return packer.make_can_msg("STEERING_CONTROL", bus, values, idx)
 
 
