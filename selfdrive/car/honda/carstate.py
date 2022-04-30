@@ -223,9 +223,6 @@ class CarState(CarStateBase):
                           cp.vl["DOORS_STATUS"]["DOOR_OPEN_RL"], cp.vl["DOORS_STATUS"]["DOOR_OPEN_RR"]])
     ret.seatbeltUnlatched = bool(cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LAMP"] or not cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LATCHED"])
 
-    if self.CP.carFingerprint in SERIAL_STEERING:
-      ret.steerFaultPermanent = True if cp_cam.vl["STEER_STATUS"]["LIN_INTERFACE_FATAL_ERROR"] else ret.steerFaultPermanent
-
     if not self.CP.openpilotLongitudinalControl:
       self.brake_error = 0
     else:
@@ -428,8 +425,7 @@ class CarState(CarStateBase):
                 ("STEER_STATUS", 100)]
       signals += [("MOTOR_TORQUE", "STEER_MOTOR_TORQUE", 0),
                   ("STEER_TORQUE_SENSOR", "STEER_STATUS", 0),
-                  ("STEER_STATUS", "STEER_STATUS", 0),
-                  ("LIN_INTERFACE_FATAL_ERROR","STEER_STATUS", 0)]
+                  ("STEER_STATUS", "STEER_STATUS", 0)]
 
     if CP.carFingerprint not in HONDA_BOSCH:
       signals += [("COMPUTER_BRAKE", "BRAKE_COMMAND", 0),
