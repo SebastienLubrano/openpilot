@@ -134,6 +134,9 @@ CAR_INFO: Dict[str, Optional[Union[HondaCarInfo, List[HondaCarInfo]]]] = {
     HondaCarInfo("Honda Inspire 2018", "All", min_steer_speed=3. * CV.MPH_TO_MS),
   ],
   CAR.ACCORDH: HondaCarInfo("Honda Accord Hybrid 2018-22", "All", min_steer_speed=3. * CV.MPH_TO_MS),
+  CAR.ACCORD_NIDEC: HondaCarInfo("Honda Accord Nidec Serial Steering Hybrid 2016-17", "All", min_steer_speed=3. * CV.MPH_TO_MS),
+  CAR.ACCORD_NIDEC_HYBRID: HondaCarInfo("Honda Accord Nidec Hybrid Serial Steering Hybrid 2016-17", "All", min_steer_speed=3. * CV.MPH_TO_MS),
+  CAR.ACCORDH: HondaCarInfo("Honda Accord Hybrid 2018-22", "All", min_steer_speed=3. * CV.MPH_TO_MS),
   CAR.CIVIC: HondaCarInfo("Honda Civic 2016-18", min_steer_speed=12. * CV.MPH_TO_MS, video_link="https://youtu.be/-IkImTe1NYE"),
   CAR.CIVIC_BOSCH: [
     HondaCarInfo("Honda Civic 2019-21", "All", "https://www.youtube.com/watch?v=4Iz1Mz5LGF8", [Footnote.CIVIC_DIESEL], 2. * CV.MPH_TO_MS),
