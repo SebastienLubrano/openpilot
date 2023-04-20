@@ -84,6 +84,10 @@ def get_can_signals(CP, gearbox_msg, main_on_sig_msg):
   if CP.carFingerprint in (HONDA_BOSCH | {CAR.CIVIC, CAR.ODYSSEY, CAR.ODYSSEY_CHN}):
     signals.append(("EPB_STATE", "EPB_STATUS"))
     checks.append(("EPB_STATUS", 50))
+  elif CP.carFingerprint in (CAR.ACCORD_NIDEC, CAR.ACCORD_NIDEC_HYBRID):
+    signals += [("MAIN_ON", "SCM_BUTTONS", 0),
+                ("CAR_GAS", "GAS_PEDAL", 0)]
+    checks += [("GAS_PEDAL", 100)]
 
   if CP.carFingerprint in HONDA_BOSCH:
     # these messages are on camera bus on radarless cars
