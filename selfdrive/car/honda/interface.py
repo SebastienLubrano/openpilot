@@ -171,17 +171,6 @@ class CarInterface(CarInterfaceBase):
 #        ret.lateralTuning.pid.kf = 0.000035
 #        ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.115], [0.052]]
 
-    elif candidate == CAR.ACURA_MDX_HYBRID:
-      stop_and_go = False
-      ret.mass = 4204. * CV.LB_TO_KG + STD_CARGO_KG  # average weight
-      ret.wheelbase = 2.82
-      ret.centerToFront = ret.wheelbase * 0.428
-      ret.steerRatio = 15.66  # as spec
-      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 238], [0, 238]]  # TODO: determine if there is a dead zone at the top end
-      tire_stiffness_factor = 0.444
-      ret.lateralTuning.pid.kf = 0.000040
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.135], [0.062]]
-
     elif candidate == CAR.ACURA_ILX:
       ret.mass = 3095. * CV.LB_TO_KG + STD_CARGO_KG
       ret.wheelbase = 2.67
@@ -354,7 +343,7 @@ class CarInterface(CarInterfaceBase):
     ret.steerActuatorDelay = 0.1
     ret.steerLimitTimer = 0.8
 
-    if candidate in (CAR.ACCORD_NIDEC, CAR.ACCORD_NIDEC_HYBRID, CAR.V6ACCORD_NIDEC, CAR.ACURA_MDX_HYBRID, CAR.ACURA_MDX):
+    if candidate in (CAR.ACCORD_NIDEC, CAR.ACCORD_NIDEC_HYBRID, CAR.V6ACCORD_NIDEC, CAR.ACURA_MDX):
       ret.steerActuatorDelay = 0.3
 
     return ret
