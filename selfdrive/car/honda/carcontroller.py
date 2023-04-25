@@ -158,7 +158,7 @@ class CarController:
     apply_steer = int(interp(limited_steer * self.params.STEER_MAX,
                              self.params.STEER_LOOKUP_BP, self.params.STEER_LOOKUP_V))
 
-    if (CS.CP.carFingerprint in SERIAL_STEERING):
+    if (self.CP.carFingerprint in SERIAL_STEERING):
       apply_steer = apply_std_steer_torque_limits(apply_steer, self.apply_steer_last, CS.out.steeringTorque, LKAS_LIMITS, ss=True)
       self.apply_steer_last = apply_steer
 
