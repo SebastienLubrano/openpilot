@@ -162,6 +162,10 @@ class CarController:
       apply_steer = apply_std_steer_torque_limits(apply_steer, self.apply_steer_last, CS.out.steeringTorque, LKAS_LIMITS, ss=True)
       self.apply_steer_last = apply_steer
 
+    # Add low steering torque cap for low speeds, manual turning, & manual interventions
+    if (CS.steer_torque_limited and (apply_steer > 60 or apply_steer < -60)):
+      apply_steer = 60 if apply_steer > 0 else -60
+
     # steer torque is converted back to CAN reference (positive when steering right)
     apply_steer = -apply_steer
 
@@ -231,7 +235,7 @@ class CarController:
           apply_brake = clip(self.brake_last - wind_brake, 0.0, 1.0)
           apply_brake = int(clip(apply_brake * self.params.NIDEC_BRAKE_MAX, 0, self.params.NIDEC_BRAKE_MAX - 1))
           pump_on, self.last_pump_ts = brake_pump_hysteresis(apply_brake, self.apply_brake_last, self.last_pump_ts, ts)
-          
+
           if self.CP.carFingerprint in HYBRID_BRAKE:
             pump_on = apply_brake > 0
 
@@ -240,8 +244,8 @@ class CarController:
                                                          pcm_override, pcm_cancel_cmd, fcw_display,
                                                          self.CP.carFingerprint, CS.stock_brake))
           self.apply_brake_last = apply_brake
-          self.brake = apply_brake / self.params.NIDEC_BRAKE_MAX
-
+          self.brake = apply_brake
+          
           if self.CP.enableGasInterceptor:
             # way too aggressive at low speed without this
             gas_mult = interp(CS.out.vEgo, [0., 10.], [0.4, 1.0])
