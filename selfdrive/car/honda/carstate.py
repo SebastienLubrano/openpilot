@@ -8,7 +8,6 @@ from opendbc.can.parser import CANParser
 from selfdrive.car.honda.hondacan import get_pt_bus
 from selfdrive.car.honda.values import CAR, DBC, STEER_THRESHOLD, HONDA_BOSCH, HONDA_NIDEC_ALT_SCM_MESSAGES, HONDA_BOSCH_ALT_BRAKE_SIGNAL, HONDA_BOSCH_RADARLESS, SERIAL_STEERING
 from selfdrive.car.interfaces import CarStateBase
-from system.swaglog import cloudlog
 
 TransmissionType = car.CarParams.TransmissionType
 
@@ -213,8 +212,7 @@ class CarState(CarStateBase):
     ret.steerFaultTemporary = steer_status not in ("NORMAL", "LOW_SPEED_LOCKOUT", "NO_TORQUE_ALERT_2")
 
     if steer_status not in ("NORMAL", "LOW_SPEED_LOCKOUT", "NO_TORQUE_ALERT_2"):
-      cloudlog.info("steer_status fault:")
-      cloudlog.info(steer_status)
+      print("steer_status fault:", steer_status)
 
     if self.CP.openpilotLongitudinalControl:
       self.brake_error = cp.vl["STANDSTILL"]["BRAKE_ERROR_1"] or cp.vl["STANDSTILL"]["BRAKE_ERROR_2"]
