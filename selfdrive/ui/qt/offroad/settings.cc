@@ -50,6 +50,18 @@ TogglesPanel::TogglesPanel(SettingsWindow *parent) : ListWidget(parent) {
       "../assets/offroad/icon_speed_limit.png",
     },
     {
+      "NudgelessALC",
+      "Nudgeless Automatic Lane Change",
+      "When above 30mph or 48km/h, openpilot will attempt a lane change when the blinkers are activated instead of waiting for the driver to nudge the wheel. Be cautious when using this feature.",
+      "../assets/offroad/icon_openpilot.png",
+    },
+    {
+      "HigherMaxAccel",
+      "Higher Accel Limit",
+      "Cruise tuned to allow a bit more acceleration than stock.",
+      "../assets/offroad/icon_openpilot.png",
+    },
+    {
       "IsLdwEnabled",
       tr("Enable Lane Departure Warnings"),
       tr("Receive alerts to steer back into the lane when your vehicle drifts over a detected lane line without a turn signal activated while driving over 31 mph (50 km/h)."),

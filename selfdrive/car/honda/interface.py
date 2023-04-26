@@ -77,10 +77,11 @@ class CarInterface(CarInterfaceBase):
       ret.longitudinalActuatorDelayUpperBound = 0.5 # s
     else:
       # default longitudinal tuning for all hondas
-      ret.longitudinalTuning.kpBP = [0., 5., 35.]
-      ret.longitudinalTuning.kpV = [1.2, 0.8, 0.5]
-      ret.longitudinalTuning.kiBP = [0., 35.]
-      ret.longitudinalTuning.kiV = [0.18, 0.12]
+      if not ret.enableGasInterceptor:
+        ret.longitudinalTuning.kpBP = [0., 5., 35.]
+        ret.longitudinalTuning.kpV = [1.2, 0.8, 0.5]
+        ret.longitudinalTuning.kiBP = [0., 35.]
+        ret.longitudinalTuning.kiV = [0.18, 0.12]
 
     eps_modified = False
     for fw in car_fw:
@@ -368,8 +369,8 @@ class CarInterface(CarInterfaceBase):
     if self.CS.brake_error:
       events.add(EventName.brakeUnavailable)
 
-    if self.CP.pcmCruise and ret.vEgo < self.CP.minEnableSpeed:
-      events.add(EventName.belowEngageSpeed)
+    # if self.CP.pcmCruise and ret.vEgo < self.CP.minEnableSpeed:
+    #   events.add(EventName.belowEngageSpeed)
 
     if self.CP.pcmCruise:
       # we engage when pcm is active (rising edge)
