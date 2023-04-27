@@ -10,7 +10,7 @@ import cereal.messaging as messaging
 from cereal import log
 
 TRAJECTORY_SIZE = 33
-CAMERA_OFFSET = 0.04
+CAMERA_OFFSET = 0.03
 
 
 PATH_COST = 1.0
@@ -126,7 +126,7 @@ class LateralPlanner:
     lateralPlan.solverExecutionTime = self.lat_mpc.solve_time
 
     lateralPlan.desire = self.DH.desire
-    lateralPlan.useLaneLines = True
+    lateralPlan.useLaneLines = False
     lateralPlan.laneChangeState = self.DH.lane_change_state
     lateralPlan.laneChangeDirection = self.DH.lane_change_direction
 
