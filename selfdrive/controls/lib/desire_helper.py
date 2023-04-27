@@ -66,7 +66,7 @@ class DesireHelper:
                           (carstate.steeringTorque < 0 and self.lane_change_direction == LaneChangeDirection.right))
         
         if Params().get_bool('NudgelessALC'):
-          if v_ego >= 30.0 * CV.MPH_TO_MS:
+          if v_ego >= LANE_CHANGE_SPEED_MIN:
             torque_applied = True
 
         blindspot_detected = ((carstate.leftBlindspot and self.lane_change_direction == LaneChangeDirection.left) or
