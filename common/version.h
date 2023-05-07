@@ -1,1 +1,1 @@
-#define COMMA_VERSION "0.9.1-SS"
+#define COMMA_VERSION "0.9.1-SS-Modded"
