@@ -3,7 +3,9 @@ from cereal import car
 from panda import Panda
 from common.conversions import Conversions as CV
 from common.numpy_fast import interp
-from selfdrive.car.honda.values import CarControllerParams, CruiseButtons, HondaFlags, CAR, HONDA_BOSCH, HONDA_NIDEC_ALT_SCM_MESSAGES, HONDA_BOSCH_ALT_BRAKE_SIGNAL, HONDA_BOSCH_RADARLESS
+from selfdrive.car.honda.values import CarControllerParams, CruiseButtons, CruiseSetting, HondaFlags, CAR, HONDA_BOSCH, HONDA_NIDEC_ALT_SCM_MESSAGES, HONDA_BOSCH_ALT_BRAKE_SIGNAL, HONDA_BOSCH_RADARLESS
+from common.realtime import DT_CTRL
+from selfdrive.controls.lib.events import ET
 from selfdrive.car import STD_CARGO_KG, CivicParams, create_button_event, scale_tire_stiffness, get_safety_config
 from selfdrive.car.interfaces import CarInterfaceBase
 from selfdrive.car.disable_ecu import disable_ecu
@@ -17,6 +19,12 @@ BUTTONS_DICT = {CruiseButtons.RES_ACCEL: ButtonType.accelCruise, CruiseButtons.D
 
 
 class CarInterface(CarInterfaceBase):
+  def __init__(self, CP, CarController, CarState):
+    super().__init__(CP, CarController, CarState)
+
+    self.last_enable_pressed = 0
+    self.last_enable_sent = 0
+
   @staticmethod
   def get_pid_accel_limits(CP, current_speed, cruise_speed):
     if CP.carFingerprint in HONDA_BOSCH:
@@ -350,36 +358,110 @@ class CarInterface(CarInterfaceBase):
   def _update(self, c):
     ret = self.CS.update(self.cp, self.cp_cam, self.cp_body)
 
+    ret.lkasEnabled = self.CS.lkasEnabled
+    ret.accEnabled = self.CS.accEnabled
+    ret.leftBlinkerOn = self.CS.leftBlinkerOn
+    ret.rightBlinkerOn = self.CS.rightBlinkerOn
+    ret.automaticLaneChange = self.CS.automaticLaneChange
+    ret.belowLaneChangeSpeed = self.CS.belowLaneChangeSpeed
+
     buttonEvents = []
 
     if self.CS.cruise_buttons != self.CS.prev_cruise_buttons:
       buttonEvents.append(create_button_event(self.CS.cruise_buttons, self.CS.prev_cruise_buttons, BUTTONS_DICT))
 
     if self.CS.cruise_setting != self.CS.prev_cruise_setting:
-      buttonEvents.append(create_button_event(self.CS.cruise_setting, self.CS.prev_cruise_setting, {1: ButtonType.altButton1}))
+      buttonEvents.append(create_button_event(self.CS.cruise_setting, self.CS.prev_cruise_setting, {CruiseSetting.LKAS_BUTTON: ButtonType.altButton1}))
 
     ret.buttonEvents = buttonEvents
 
+    extraGears = []
+    if not (self.CS.CP.openpilotLongitudinalControl or self.CS.CP.enableGasInterceptor):
+      extraGears = [car.CarState.GearShifter.sport, car.CarState.GearShifter.low]
+
     # events
-    events = self.create_common_events(ret, pcm_enable=False)
+    events = self.create_common_events(ret, extra_gears=extraGears, pcm_enable=False)
+
     if self.CS.brake_error:
       events.add(EventName.brakeUnavailable)
 
-    # if self.CP.pcmCruise and ret.vEgo < self.CP.minEnableSpeed:
-    #   events.add(EventName.belowEngageSpeed)
+    if self.CP.pcmCruise and ret.vEgo < self.CP.minEnableSpeed and not self.CS.lkasEnabled:
+      events.add(EventName.belowEngageSpeed)
+
+    self.CS.disengageByBrake = self.CS.disengageByBrake or ret.disengageByBrake
+
+    # if self.CP.pcmCruise:
+    #   # we engage when pcm is active (rising edge)
+    #   if ret.cruiseState.enabled and not self.CS.out.cruiseState.enabled:
+    #     events.add(EventName.pcmEnable)
+    #   elif not ret.cruiseState.enabled and (c.actuators.accel >= 0. or not self.CP.openpilotLongitudinalControl):
+    #     # it can happen that car cruise disables while comma system is enabled: need to
+    #     # keep braking if needed or if the speed is very low
+    #     if ret.vEgo < self.CP.minEnableSpeed + 2.:
+    #       # non loud alert if cruise disables below 25mph as expected (+ a little margin)
+    #       events.add(EventName.speedTooLow)
+    #     else:
+    #       events.add(EventName.cruiseDisabled)
+
+    cur_time = self.frame * DT_CTRL
+    enable_pressed = False
+    enable_from_brake = False
+
+    if self.CS.disengageByBrake and not ret.brakePressed and not ret.brakeHoldActive and self.CS.lkasEnabled:
+      self.last_enable_pressed = cur_time
+      enable_pressed = True
+      enable_from_brake = True
+
+    if not ret.brakePressed and not ret.brakeHoldActive:
+      self.CS.disengageByBrake = False
+      ret.disengageByBrake = False
+
+    # Handle button presses
+    for b in ret.buttonEvents:
+      # Enable OP long on falling edge of enable buttons (defaults to accelCruise and decelCruise, overridable per-port)
+      if b.type in [ButtonType.accelCruise, ButtonType.decelCruise] and not b.pressed:
+        self.last_enable_pressed = cur_time
+        enable_pressed = True
+
+      # do disable on LKAS button if ACC is disabled
+      if b.type in [ButtonType.altButton1] and b.pressed:
+        if not self.CS.lkasEnabled: #disabled LKAS
+          if not ret.cruiseState.enabled:
+            events.add(EventName.buttonCancel)
+          else:
+            events.add(EventName.manualSteeringRequired)
+        else: #enabled LKAS
+          if not ret.cruiseState.enabled:
+            self.last_enable_pressed = cur_time
+            enable_pressed = True
+        
+      # Disable on rising and falling edge of cancel for both stock and OP long
+      if b.type == ButtonType.cancel and b.pressed:
+        if not self.CS.lkasEnabled:
+          events.add(EventName.buttonCancel)
+        else:
+          events.add(EventName.manualLongitudinalRequired)
 
     if self.CP.pcmCruise:
-      # we engage when pcm is active (rising edge)
-      if ret.cruiseState.enabled and not self.CS.out.cruiseState.enabled:
-        events.add(EventName.pcmEnable)
-      elif not ret.cruiseState.enabled and (c.actuators.accel >= 0. or not self.CP.openpilotLongitudinalControl):
-        # it can happen that car cruise disables while comma system is enabled: need to
-        # keep braking if needed or if the speed is very low
-        if ret.vEgo < self.CP.minEnableSpeed + 2.:
-          # non loud alert if cruise disables below 25mph as expected (+ a little margin)
-          events.add(EventName.speedTooLow)
+      # KEEP THIS EVENT LAST! send enable event if button is pressed and there are
+      # NO_ENTRY events, so controlsd will display alerts. Also not send enable events
+      # too close in time, so a no_entry will not be followed by another one.
+      # TODO: button press should be the only thing that triggers enable
+      if ((cur_time - self.last_enable_pressed) < 0.2 and
+          (cur_time - self.last_enable_sent) > 0.2 and
+          (ret.cruiseState.enabled or self.CS.lkasEnabled)) or \
+         (enable_pressed and events.any(ET.NO_ENTRY)):
+        if enable_from_brake:
+          events.add(EventName.silentButtonEnable)
         else:
-          events.add(EventName.cruiseDisabled)
+          events.add(EventName.buttonEnable)
+        self.last_enable_sent = cur_time
+    elif enable_pressed:
+      if enable_from_brake:
+        events.add(EventName.silentButtonEnable)
+      else:
+        events.add(EventName.buttonEnable)
+    
     if self.CS.CP.minEnableSpeed > 0 and ret.vEgo < 0.001:
       events.add(EventName.manualRestart)
 

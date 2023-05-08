@@ -165,19 +165,48 @@ static int honda_rx_hook(CANPacket_t *to_push) {
     // 0x1A6 for the ILX, 0x296 for the Civic Touring
     if (((addr == 0x1A6) || (addr == 0x296)) && (bus == pt_bus)) {
       int button = (GET_BYTE(to_push, 0) & 0xE0U) >> 5;
+      int button2 = ((GET_BYTE(to_push, (addr == 0x296) ? 0 : 5) & 0x0CU) >> 2);
 
-      // exit controls once main or cancel are pressed
-      if ((button == HONDA_BTN_MAIN) || (button == HONDA_BTN_CANCEL)) {
+
+      switch (button) {
+        case 1:  // main
+          disengageFromBrakes = false;
+          controls_allowed = 0;
+          break;
+        case 3:  // set
+        case 4:  // resume
+          if (acc_main_on) {
+            controls_allowed = 1;
+          }
+          break;
+        case 2: 
+          if(!(alternative_experience & UNSAFE_SPLIT_LKAS_AND_ACC))
+          {
+            disengageFromBrakes = false;
+            controls_allowed = 0;
+            break;
+          }
+          // fallthrough
+        default:
+          switch(button2)
+          {
+            case 1: //lkas_button
+              if (acc_main_on) {
+                if(alternative_experience & UNSAFE_SPLIT_LKAS_AND_ACC)
+                {
+                  controls_allowed = 1;
+                }
+              }
+              break;
+            default:
+              break;
+          }
+          break; // any other button is irrelevant
+      }
+
+      if (!acc_main_on) {
         controls_allowed = 0;
       }
-
-      // enter controls on the falling edge of set or resume
-      bool set = (button == HONDA_BTN_NONE) && (cruise_button_prev == HONDA_BTN_SET);
-      bool res = (button == HONDA_BTN_NONE) && (cruise_button_prev == HONDA_BTN_RESUME);
-      if (acc_main_on && !pcm_cruise && (set || res)) {
-        controls_allowed = 1;
-      }
-      cruise_button_prev = button;
     }
 
     // user brake signal on 0x17C reports applied brake from computer brake on accord

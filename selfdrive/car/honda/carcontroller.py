@@ -96,7 +96,7 @@ def process_hud_alert(hud_alert):
 
 HUDData = namedtuple("HUDData",
                      ["pcm_accel", "v_cruise", "lead_visible",
-                      "lanes_visible", "fcw", "acc_alert", "steer_required"])
+                      "lanes_visible", "fcw", "acc_alert", "steer_required", "dashed_lines"])
 
 
 def rate_limit_steer(new_steer, last_steer):
@@ -149,8 +149,22 @@ class CarController:
     # *** rate limit after the enable check ***
     self.brake_last = rate_limit(pre_limit_brake, self.brake_last, -2., DT_CTRL)
 
+    if CC.enabled and CS.out.cruiseState.enabled:
+      if CC.hudControl.leadVisible:
+        hud_car = 2
+      else:
+        hud_car = 1
+    else:
+      hud_car = 0
+
     # vehicle hud display, wait for one update from 10Hz 0x304 msg
     fcw_display, steer_required, acc_alert = process_hud_alert(hud_control.visualAlert)
+
+    cur_time = self.frame * DT_CTRL
+    if (CS.leftBlinkerOn or CS.rightBlinkerOn):
+      self.signal_last = cur_time
+
+    lkas_active = CC.enabled and not CS.steer_not_allowed and CS.lkasEnabled and ((CS.automaticLaneChange and not CS.belowLaneChangeSpeed) or ((not ((cur_time - self.signal_last) < 1) or not CS.belowLaneChangeSpeed) and not (CS.leftBlinkerOn or CS.rightBlinkerOn)))
 
     # **** process the car messages ****
 
@@ -223,6 +237,8 @@ class CarController:
         if self.CP.carFingerprint in HONDA_BOSCH:
           self.accel = clip(accel, self.params.BOSCH_ACCEL_MIN, self.params.BOSCH_ACCEL_MAX)
           self.gas = interp(accel, self.params.BOSCH_GAS_LOOKUP_BP, self.params.BOSCH_GAS_LOOKUP_V)
+          if not CS.out.cruiseState.enabled:
+            self.gas = 0.
 
           stopping = actuators.longControlState == LongCtrlState.stopping
           can_sends.extend(hondacan.create_acc_commands(self.packer, CC.enabled, CC.longActive, self.accel, self.gas,
@@ -230,6 +246,8 @@ class CarController:
         else:
           apply_brake = clip(self.brake_last - wind_brake, 0.0, 1.0)
           apply_brake = int(clip(apply_brake * self.params.NIDEC_BRAKE_MAX, 0, self.params.NIDEC_BRAKE_MAX - 1))
+          if not CS.out.cruiseState.enabled and not (CS.CP.pcmCruise and CS.accEnabled and CS.CP.minEnableSpeed > 0 and not CS.out.cruiseState.enabled):
+            apply_brake = 0.
           pump_on, self.last_pump_ts = brake_pump_hysteresis(apply_brake, self.apply_brake_last, self.last_pump_ts, ts)
 
           if self.CP.carFingerprint in HYBRID_BRAKE:
@@ -249,7 +267,7 @@ class CarController:
             # This prevents unexpected pedal range rescaling
             # Sending non-zero gas when OP is not enabled will cause the PCM not to respond to throttle as expected
             # when you do enable.
-            if CC.longActive:
+            if CC.longActive and CS.out.cruiseState.enabled:
               self.gas = clip(gas_mult * (gas - brake + wind_brake * 3 / 4), 0., 1.)
             else:
               self.gas = 0.0
@@ -257,8 +275,8 @@ class CarController:
 
     # Send dashboard UI commands.
     if self.frame % 10 == 0:
-      hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible,
-                    hud_control.lanesVisible, fcw_display, acc_alert, steer_required)
+      hud = HUDData(int(pcm_accel), (int(round(hud_v_cruise)) if hud_car != 0 else 255), hud_car,
+                    CC.hudControl.lanesVisible and lkas_active, fcw_display, acc_alert, steer_required, CS.lkasEnabled and not lkas_active)
       can_sends.extend(hondacan.create_ui_commands(self.packer, self.CP, CC.enabled, pcm_speed, hud, CS.is_metric, CS.acc_hud, CS.lkas_hud))
 
       if self.CP.openpilotLongitudinalControl and self.CP.carFingerprint not in HONDA_BOSCH:
