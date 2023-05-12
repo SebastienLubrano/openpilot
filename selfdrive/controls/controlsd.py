@@ -62,6 +62,12 @@ class Controls:
   def __init__(self, sm=None, pm=None, can_sock=None, CI=None):
     config_realtime_process(4, Priority.CTRL_HIGH)
 
+    self.accel_pressed = False
+    self.decel_pressed = False
+    self.accel_pressed_last = 0.
+    self.decel_pressed_last = 0.
+    self.fastMode = False
+
     # Ensure the current branch is cached, otherwise the first iteration of controlsd lags
     self.branch = get_short_branch("")
 
