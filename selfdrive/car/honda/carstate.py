@@ -355,7 +355,6 @@ class CarState(CarStateBase):
       # LOW_SPEED_LOCKOUT is not worth a warning
       if (self.automaticLaneChange and not self.belowLaneChangeSpeed and (self.rightBlinkerOn or self.leftBlinkerOn)) or not (self.rightBlinkerOn or self.leftBlinkerOn):
         ret.steerFaultTemporary = steer_status not in ["NORMAL", "LOW_SPEED_LOCKOUT", "NO_TORQUE_ALERT_2"]
-        ret.steerFaultTemporary = steer_status not in ("NORMAL", "LOW_SPEED_LOCKOUT", "NO_TORQUE_ALERT_2")
 
 
     if self.CP.carFingerprint in HONDA_BOSCH:
