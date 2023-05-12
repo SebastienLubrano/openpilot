@@ -96,7 +96,7 @@ def process_hud_alert(hud_alert):
 
 HUDData = namedtuple("HUDData",
                      ["pcm_accel", "v_cruise", "lead_visible",
-                      "lanes_visible", "fcw", "acc_alert", "steer_required", "dashed_lines"])
+                      "lanes_visible", "fcw", "acc_alert", "steer_required", "dashed_lanes"])
 
 
 def rate_limit_steer(new_steer, last_steer):
