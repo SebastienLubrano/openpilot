@@ -613,7 +613,7 @@ class Controls:
       actuators.accel = self.LoC.update(long_active, CS, long_plan, pid_accel_limits, t_since_plan)
 
       # Steering PID loop and lateral MPC
-      lat_active = self.active and (not CS.steerWarning) and (not CS.steerError) and (CS.vEgo > self.CP.minSteerSpeed) and CS.lkasEnabled and ((not CS.belowLaneChangeSpeed) or ((not (((self.sm.frame - self.last_blinker_frame) * DT_CTRL) < 1.0))))
+      lat_active = self.active and (not CS.steerFaultTemporary) and (not CS.steerFaultPermanent) and (CS.vEgo > self.CP.minSteerSpeed) and CS.lkasEnabled and ((not CS.belowLaneChangeSpeed) or ((not (((self.sm.frame - self.last_blinker_frame) * DT_CTRL) < 1.0))))
       self.desired_curvature, self.desired_curvature_rate = get_lag_adjusted_curvature(self.CP, CS.vEgo,
                                                                                        lat_plan.psis,
                                                                                        lat_plan.curvatures,
