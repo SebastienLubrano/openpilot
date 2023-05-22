@@ -10,18 +10,18 @@ import cereal.messaging as messaging
 from cereal import log
 
 TRAJECTORY_SIZE = 33
-CAMERA_OFFSET = 0.03
+CAMERA_OFFSET = 0.04
 
 
 PATH_COST = 1.0
 LATERAL_MOTION_COST = 0.11
 LATERAL_ACCEL_COST = 0.5
-LATERAL_JERK_COST = 0.04
+LATERAL_JERK_COST = 0.05
 # Extreme steering rate is unpleasant, even
 # when it does not cause bad jerk.
 # TODO this cost should be lowered when low
 # speed lateral control is stable on all cars
-STEERING_RATE_COST = 5.0
+STEERING_RATE_COST = 10.0
 
 
 class LateralPlanner:
