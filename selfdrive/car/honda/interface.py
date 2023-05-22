@@ -3,7 +3,7 @@ from cereal import car
 from panda import Panda
 from common.conversions import Conversions as CV
 from common.numpy_fast import interp
-from selfdrive.car.honda.values import CarControllerParams, CruiseButtons, HondaFlags, CAR, HONDA_BOSCH, HONDA_NIDEC_ALT_SCM_MESSAGES, HONDA_BOSCH_ALT_BRAKE_SIGNAL, HONDA_BOSCH_RADARLESS
+from selfdrive.car.honda.values import CarControllerParams, CruiseButtons, HondaFlags, CAR, HONDA_BOSCH, HONDA_NIDEC_ALT_SCM_MESSAGES, HONDA_BOSCH_ALT_BRAKE_SIGNAL, HONDA_BOSCH_RADARLESS, SERIAL_STEERING
 from selfdrive.car import STD_CARGO_KG, CivicParams, create_button_event, scale_tire_stiffness, get_safety_config
 from selfdrive.car.interfaces import CarInterfaceBase
 from selfdrive.car.disable_ecu import disable_ecu
@@ -77,10 +77,11 @@ class CarInterface(CarInterfaceBase):
         ret.stopAccel = CarControllerParams.BOSCH_ACCEL_MIN  # stock uses -4.0 m/s^2 once stopped but limited by safety model
     else:
       # default longitudinal tuning for all hondas
-      ret.longitudinalTuning.kpBP = [0., 5., 35.]
-      ret.longitudinalTuning.kpV = [1.2, 0.8, 0.5]
-      ret.longitudinalTuning.kiBP = [0., 35.]
-      ret.longitudinalTuning.kiV = [0.18, 0.12]
+      if not ret.enableGasInterceptor:
+        ret.longitudinalTuning.kpBP = [0., 5., 35.]
+        ret.longitudinalTuning.kpV = [1.2, 0.8, 0.5]
+        ret.longitudinalTuning.kiBP = [0., 35.]
+        ret.longitudinalTuning.kiV = [0.18, 0.12]
 
     eps_modified = False
     for fw in car_fw:
@@ -127,6 +128,28 @@ class CarInterface(CarInterfaceBase):
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.3], [0.09]]
       else:
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.18]]
+
+    elif candidate in (CAR.ACCORD_NIDEC, CAR.V6ACCORD_NIDEC):
+      stop_and_go = False
+      ret.mass = 3279. * CV.LB_TO_KG + STD_CARGO_KG
+      ret.wheelbase = 2.75
+      ret.centerToFront = ret.wheelbase * 0.39
+      ret.steerRatio = 13.66 # 13.37 is spec
+      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 238], [0, 238]]
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.29], [0.07]]      
+      ret.lateralTuning.pid.kf = 0.000025
+      tire_stiffness_factor = 0.8467
+
+    elif candidate == CAR.ACCORD_NIDEC_HYBRID:
+      stop_and_go = False
+      ret.mass = 3536. * CV.LB_TO_KG + STD_CARGO_KG
+      ret.wheelbase = 2.75
+      ret.centerToFront = ret.wheelbase * 0.39
+      ret.steerRatio = 13.66 # 13.37 is spec
+      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 238], [0, 238]]
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.29], [0.07]]      
+      ret.lateralTuning.pid.kf = 0.000025
+      tire_stiffness_factor = 0.8467
 
     elif candidate == CAR.ACURA_ILX:
       ret.mass = 3095. * CV.LB_TO_KG + STD_CARGO_KG
@@ -303,6 +326,9 @@ class CarInterface(CarInterfaceBase):
     ret.steerActuatorDelay = 0.1
     ret.steerLimitTimer = 0.8
 
+    if candidate in SERIAL_STEERING:
+      ret.steerActuatorDelay = 0.2
+
     return ret
 
   @staticmethod
@@ -329,8 +355,8 @@ class CarInterface(CarInterfaceBase):
     if self.CS.brake_error:
       events.add(EventName.brakeUnavailable)
 
-    if self.CP.pcmCruise and ret.vEgo < self.CP.minEnableSpeed:
-      events.add(EventName.belowEngageSpeed)
+    # if self.CP.pcmCruise and ret.vEgo < self.CP.minEnableSpeed:
+    #   events.add(EventName.belowEngageSpeed)
 
     if self.CP.pcmCruise:
       # we engage when pcm is active (rising edge)
