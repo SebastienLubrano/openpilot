@@ -70,11 +70,11 @@ def get_jerk_factor(personality=log.LongitudinalPersonality.standard):
 
 def get_T_FOLLOW(personality=log.LongitudinalPersonality.standard):
   if personality==log.LongitudinalPersonality.relaxed:
-    return 1.75
+    return 1.7
   elif personality==log.LongitudinalPersonality.standard:
-    return 1.45
+    return 1.4
   elif personality==log.LongitudinalPersonality.aggressive:
-    return 1.25
+    return 1.1
   else:
     raise NotImplementedError("Longitudinal personality not supported")
 
@@ -129,7 +129,6 @@ def gen_long_ocp():
   ocp.model = gen_long_model()
 
   Tf = T_IDXS[-1]
-
   # set dimensions
   ocp.dims.N = N
 
