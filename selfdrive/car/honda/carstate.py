@@ -106,7 +106,7 @@ def get_can_signals(CP, gearbox_msg, main_on_sig_msg):
     signals += [("CRUISE_SPEED_PCM", "CRUISE"),
                 ("CRUISE_SPEED_OFFSET", "CRUISE_PARAMS")]
 
-    if CP.carFingerprint == CAR.ODYSSEY_CHN or CP.carFingerprint in SERIAL_STEERING::
+    if CP.carFingerprint == CAR.ODYSSEY_CHN or CP.carFingerprint in SERIAL_STEERING:
       checks.append(("CRUISE_PARAMS", 10))
     else:
       checks.append(("CRUISE_PARAMS", 50))
